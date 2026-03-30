@@ -4,8 +4,86 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>إشارة AI — التقنيات</title>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared.css">
+<style>
+
+  /* ── Language Toggle ── */
+  .lang-toggle {
+    display: flex;
+    align-items: center;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    user-select: none;
+    flex-shrink: 0;
+    gap: 0;
+  }
+  .lang-toggle:hover { border-color: var(--teal); }
+
+  .lang-pill {
+    font-size: 0.8rem;
+    font-weight: 800;
+    padding: 5px 14px;
+    border-radius: 999px;
+    color: var(--muted);
+    transition: background 0.22s, color 0.22s;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    font-family: 'Tajawal', 'Inter', sans-serif;
+    border: none;
+    background: none;
+  }
+  .lang-pill.active {
+    background: var(--teal);
+    color: #fff;
+  }
+
+  /* ── English font override ── */
+  html[lang="en"] body,
+  html[lang="en"] .logo-name,
+  html[lang="en"] .logo-sub,
+  html[lang="en"] .nav-links a,
+  html[lang="en"] .nav-pill,
+  html[lang="en"] .banner-breadcrumb,
+  html[lang="en"] .banner-title,
+  html[lang="en"] .banner-sub,
+  html[lang="en"] .tech-tab,
+  html[lang="en"] .tech-section-title,
+  html[lang="en"] .tech-nm,
+  html[lang="en"] .tech-ds,
+  html[lang="en"] .tech-badge,
+  html[lang="en"] .arch-block-name,
+  html[lang="en"] .arch-block-sub,
+  html[lang="en"] .metrics-table,
+  html[lang="en"] .foot-title,
+  html[lang="en"] .foot-sub,
+  html[lang="en"] .foot-nav a,
+  html[lang="en"] .foot-badge,
+  html[lang="en"] .lang-pill { font-family: 'Inter', sans-serif; }
+
+  /* ── Smooth page fade ── */
+  body { transition: opacity 0.18s ease; }
+  body.lang-switching { opacity: 0; }
+
+  /* ── Bilingual content ── */
+  [data-ar], [data-en],
+  span[data-ar], span[data-en] { display: none; }
+
+  html[lang="ar"] [data-ar]    { display: revert; }
+  html[lang="en"] [data-en]    { display: revert; }
+  html[lang="ar"] span[data-ar],
+  html[lang="ar"] span[data-en] { display: none; }
+  html[lang="ar"] span[data-ar] { display: inline; }
+  html[lang="en"] span[data-en] { display: inline; }
+
+  /* arch arrows flip in LTR */
+  html[lang="en"] .arch-arrow { transform: scaleX(-1); }
+
+</style>
 </head>
 <body>
 <div class="page">
@@ -13,45 +91,80 @@
 <nav>
   <div class="nav-logo">
     <div class="logo-mark"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></div>
-    <div><div class="logo-name">إشارة AI</div><div class="logo-sub">مترجم لغة الإشارة</div></div>
+    <div>
+      <div class="logo-name"><span data-ar>إشارة AI</span><span data-en>Ishara AI</span></div>
+      <div class="logo-sub"><span data-ar>مترجم لغة الإشارة</span><span data-en>Sign Language Translator</span></div>
+    </div>
   </div>
+
   <div class="nav-links">
-    <a href="index.html">الرئيسية</a>
-    <a href="demo.html">النموذج</a>
-    <a href="how.html">آلية العمل</a>
-    <a href="tech.html" class="active">التقنيات</a>
+    <a href="index.html"><span data-ar>الرئيسية</span><span data-en>Home</span></a>
+    <a href="demo.html"><span data-ar>النموذج</span><span data-en>Demo</span></a>
+    <a href="how.html"><span data-ar>آلية العمل</span><span data-en>How It Works</span></a>
+    <a href="tech.html" class="active"><span data-ar>التقنيات</span><span data-en>Technology</span></a>
   </div>
-  <div class="nav-pill">مشروع تخرج · جامعة الطائف</div>
+
+  <button class="lang-toggle" id="langToggle" aria-label="Switch language">
+    <span class="lang-pill active" id="pillAr">عر</span>
+    <span class="lang-pill"        id="pillEn">EN</span>
+  </button>
+
+  <div class="nav-pill">
+    <span data-ar>مشروع تخرج · جامعة الطائف</span>
+    <span data-en>Graduation Project · Taif University</span>
+  </div>
 </nav>
 
 <div class="page-banner">
   <div class="banner-content">
-    <div class="banner-breadcrumb"><a href="index.html">الرئيسية</a> &larr; التقنيات المستخدمة</div>
-    <h1 class="banner-title">التقنيات المستخدمة</h1>
-    <p class="banner-sub">استعراض مفصّل للمكتبات والأطر والبنية التحتية التي يقوم عليها النظام، مقسّمة إلى أقسام واضحة.</p>
+    <div class="banner-breadcrumb">
+      <a href="index.html"><span data-ar>الرئيسية</span><span data-en>Home</span></a>
+      &larr; <span data-ar>التقنيات المستخدمة</span><span data-en>Technologies Used</span>
+    </div>
+    <h1 class="banner-title">
+      <span data-ar>التقنيات المستخدمة</span>
+      <span data-en>Technologies Used</span>
+    </h1>
+    <p class="banner-sub">
+      <span data-ar>استعراض مفصّل للمكتبات والأطر والبنية التحتية التي يقوم عليها النظام، مقسّمة إلى أقسام واضحة.</span>
+      <span data-en>A detailed look at the libraries, frameworks, and infrastructure the system is built on, organized into clear sections.</span>
+    </p>
   </div>
 </div>
 
 <div class="tech-layout">
 
   <div class="tech-tabs">
-    <button class="tech-tab active" onclick="showTab('libraries',this)">المكتبات والأدوات</button>
-    <button class="tech-tab" onclick="showTab('models',this)">نماذج الذكاء الاصطناعي</button>
-
-    <button class="tech-tab" onclick="showTab('infra',this)">بيئة التطوير</button>
-    <button class="tech-tab" onclick="showTab('metrics',this)">مقاييس التقييم</button>
+    <button class="tech-tab active" onclick="showTab('libraries',this)">
+      <span data-ar>المكتبات والأدوات</span><span data-en>Libraries & Tools</span>
+    </button>
+    <button class="tech-tab" onclick="showTab('models',this)">
+      <span data-ar>نماذج الذكاء الاصطناعي</span><span data-en>AI Models</span>
+    </button>
+    <button class="tech-tab" onclick="showTab('infra',this)">
+      <span data-ar>بيئة التطوير</span><span data-en>Dev Environment</span>
+    </button>
+    <button class="tech-tab" onclick="showTab('metrics',this)">
+      <span data-ar>مقاييس التقييم</span><span data-en>Evaluation Metrics</span>
+    </button>
   </div>
 
   <!-- TAB 1 -->
   <div class="tech-tab-content active" id="tab-libraries">
-    <div class="tech-section-title">لغة البرمجة والمكتبات الأساسية</div>
+    <div class="tech-section-title">
+      <span data-ar>لغة البرمجة والمكتبات الأساسية</span>
+      <span data-en>Programming Language & Core Libraries</span>
+    </div>
     <div class="tech-grid">
       <div class="tech-tile">
         <div class="tech-tile-top">
           <div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
           <div class="tech-nm">Python</div>
         </div>
-        <div class="tech-ds">لغة البرمجة الرئيسية للمشروع بأكمله، تتميّز بنظام بيئي غني لتطبيقات الذكاء الاصطناعي ورؤية الحاسوب.</div>
+        <div class="tech-ds">
+          <span data-ar>لغة البرمجة الرئيسية للمشروع بأكمله، تتميّز بنظام بيئي غني لتطبيقات الذكاء الاصطناعي ورؤية الحاسوب.</span>
+          <span data-en>The primary programming language for the entire project, featuring a rich ecosystem for AI and computer vision applications.</span>
+        </div>
         <span class="tech-badge">v3.10+</span>
       </div>
       <div class="tech-tile">
@@ -59,7 +172,10 @@
           <div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
           <div class="tech-nm">OpenCV</div>
         </div>
-        <div class="tech-ds">مكتبة رؤية الحاسوب الأساسية لالتقاط الفيديو، معالجة الإطارات، التطبيع، وعزل مناطق اليد.</div>
+        <div class="tech-ds">
+          <span data-ar>مكتبة رؤية الحاسوب الأساسية لالتقاط الفيديو، معالجة الإطارات، التطبيع، وعزل مناطق اليد.</span>
+          <span data-en>The core computer vision library for video capture, frame processing, normalization, and hand region isolation.</span>
+        </div>
         <span class="tech-badge">cv2</span>
       </div>
       <div class="tech-tile">
@@ -67,7 +183,10 @@
           <div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></div>
           <div class="tech-nm">MediaPipe</div>
         </div>
-        <div class="tech-ds">إطار عمل من Google لتتبّع نقاط اليد الـ٢١ بدقة عالية في الوقت الفعلي مع دعم ثلاثي الأبعاد.</div>
+        <div class="tech-ds">
+          <span data-ar>إطار عمل من Google لتتبّع نقاط اليد الـ٢١ بدقة عالية في الوقت الفعلي مع دعم ثلاثي الأبعاد.</span>
+          <span data-en>Google's framework for tracking 21 hand landmarks with high accuracy in real time, including 3D support.</span>
+        </div>
         <span class="tech-badge">Hands API</span>
       </div>
       <div class="tech-tile">
@@ -75,7 +194,10 @@
           <div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg></div>
           <div class="tech-nm">PyTorch</div>
         </div>
-        <div class="tech-ds">الإطار الرئيسي لبناء وتدريب نماذج التعلّم العميق (CNN + LSTM) مع دعم GPU متكامل.</div>
+        <div class="tech-ds">
+          <span data-ar>الإطار الرئيسي لبناء وتدريب نماذج التعلّم العميق (CNN + LSTM) مع دعم GPU متكامل.</span>
+          <span data-en>The primary framework for building and training deep learning models (CNN + LSTM) with full GPU support.</span>
+        </div>
         <span class="tech-badge">v2.0+</span>
       </div>
       <div class="tech-tile">
@@ -83,7 +205,10 @@
           <div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></div>
           <div class="tech-nm">TorchVision</div>
         </div>
-        <div class="tech-ds">مكمّل PyTorch للتعامل مع مجموعات البيانات البصرية، التحويلات، والنماذج المدرَّبة مسبقاً.</div>
+        <div class="tech-ds">
+          <span data-ar>مكمّل PyTorch للتعامل مع مجموعات البيانات البصرية، التحويلات، والنماذج المدرَّبة مسبقاً.</span>
+          <span data-en>PyTorch's companion library for visual datasets, transforms, and pre-trained models.</span>
+        </div>
         <span class="tech-badge">Transforms</span>
       </div>
       <div class="tech-tile">
@@ -91,18 +216,28 @@
           <div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
           <div class="tech-nm">NumPy + Pandas</div>
         </div>
-        <div class="tech-ds">العمليات العددية، معالجة المصفوفات، إدارة مجموعات البيانات، وترميز التسميات.</div>
+        <div class="tech-ds">
+          <span data-ar>العمليات العددية، معالجة المصفوفات، إدارة مجموعات البيانات، وترميز التسميات.</span>
+          <span data-en>Numerical operations, array processing, dataset management, and label encoding.</span>
+        </div>
         <span class="tech-badge">Array + DataFrame</span>
       </div>
     </div>
-    <div class="tech-section-title" style="margin-top:2rem">مكتبات المخرجات الصوتية</div>
+
+    <div class="tech-section-title" style="margin-top:2rem">
+      <span data-ar>مكتبات المخرجات الصوتية</span>
+      <span data-en>Audio Output Libraries</span>
+    </div>
     <div class="tech-grid">
       <div class="tech-tile">
         <div class="tech-tile-top">
           <div class="tech-ico-box amber"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div>
           <div class="tech-nm">gTTS</div>
         </div>
-        <div class="tech-ds">مكتبة تركيب الكلام من النص (Text-to-Speech) لتوليد المخرجات الصوتية من الجمل المترجمة.</div>
+        <div class="tech-ds">
+          <span data-ar>مكتبة تركيب الكلام من النص (Text-to-Speech) لتوليد المخرجات الصوتية من الجمل المترجمة.</span>
+          <span data-en>A Text-to-Speech library for generating audio output from translated sentences.</span>
+        </div>
         <span class="tech-badge amber">TTS</span>
       </div>
       <div class="tech-tile">
@@ -110,7 +245,10 @@
           <div class="tech-ico-box amber"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></div>
           <div class="tech-nm">Azure Speech API</div>
         </div>
-        <div class="tech-ds">خيار بديل لتركيب الصوت بجودة احترافية عبر خدمات Microsoft Azure المعرفية.</div>
+        <div class="tech-ds">
+          <span data-ar>خيار بديل لتركيب الصوت بجودة احترافية عبر خدمات Microsoft Azure المعرفية.</span>
+          <span data-en>An alternative for professional-quality speech synthesis via Microsoft Azure Cognitive Services.</span>
+        </div>
         <span class="tech-badge amber">Cognitive Services</span>
       </div>
     </div>
@@ -118,34 +256,62 @@
 
   <!-- TAB 2 -->
   <div class="tech-tab-content" id="tab-models">
-    <div class="tech-section-title">بنية النموذج المقترحة</div>
-    <div class="arch-diagram">
-      <div class="arch-block dark"><div class="arch-block-name">إدخال</div><div class="arch-block-sub">Landmarks</div></div>
-      <div class="arch-arrow">←</div>
-      <div class="arch-block"><div class="arch-block-name">CNN Backbone</div><div class="arch-block-sub">استخراج السمات</div></div>
-      <div class="arch-arrow">←</div>
-      <div class="arch-block"><div class="arch-block-name">LSTM Layers</div><div class="arch-block-sub">التسلسل الزمني</div></div>
-      <div class="arch-arrow">←</div>
-      <div class="arch-block"><div class="arch-block-name">Fully Connected</div><div class="arch-block-sub">تصنيف الإشارة</div></div>
-      <div class="arch-arrow">←</div>
-      <div class="arch-block amber"><div class="arch-block-name">Softmax</div><div class="arch-block-sub">نسبة الثقة</div></div>
+    <div class="tech-section-title">
+      <span data-ar>بنية النموذج المقترحة</span>
+      <span data-en>Proposed Model Architecture</span>
     </div>
-    <div class="tech-section-title">استراتيجية النماذج</div>
+    <div class="arch-diagram">
+      <div class="arch-block dark">
+        <div class="arch-block-name"><span data-ar>إدخال</span><span data-en>Input</span></div>
+        <div class="arch-block-sub">Landmarks</div>
+      </div>
+      <div class="arch-arrow">←</div>
+      <div class="arch-block">
+        <div class="arch-block-name">CNN Backbone</div>
+        <div class="arch-block-sub"><span data-ar>استخراج السمات</span><span data-en>Feature Extraction</span></div>
+      </div>
+      <div class="arch-arrow">←</div>
+      <div class="arch-block">
+        <div class="arch-block-name">LSTM Layers</div>
+        <div class="arch-block-sub"><span data-ar>التسلسل الزمني</span><span data-en>Temporal Sequence</span></div>
+      </div>
+      <div class="arch-arrow">←</div>
+      <div class="arch-block">
+        <div class="arch-block-name">Fully Connected</div>
+        <div class="arch-block-sub"><span data-ar>تصنيف الإشارة</span><span data-en>Sign Classification</span></div>
+      </div>
+      <div class="arch-arrow">←</div>
+      <div class="arch-block amber">
+        <div class="arch-block-name">Softmax</div>
+        <div class="arch-block-sub"><span data-ar>نسبة الثقة</span><span data-en>Confidence Score</span></div>
+      </div>
+    </div>
+
+    <div class="tech-section-title">
+      <span data-ar>استراتيجية النماذج</span>
+      <span data-en>Model Strategy</span>
+    </div>
     <div class="tech-grid">
       <div class="tech-tile">
         <div class="tech-tile-top">
           <div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
-          <div class="tech-nm">CNN — التعلّم المكاني</div>
+          <div class="tech-nm"><span data-ar>CNN — التعلّم المكاني</span><span data-en>CNN — Spatial Learning</span></div>
         </div>
-        <div class="tech-ds">تستخرج الشبكات التلافيفية السمات المكانية من إطارات الفيديو أو صور نقاط المعالم.</div>
+        <div class="tech-ds">
+          <span data-ar>تستخرج الشبكات التلافيفية السمات المكانية من إطارات الفيديو أو صور نقاط المعالم.</span>
+          <span data-en>Convolutional networks extract spatial features from video frames or landmark images.</span>
+        </div>
         <span class="tech-badge">Spatial Features</span>
       </div>
       <div class="tech-tile">
         <div class="tech-tile-top">
           <div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
-          <div class="tech-nm">LSTM — التسلسل الزمني</div>
+          <div class="tech-nm"><span data-ar>LSTM — التسلسل الزمني</span><span data-en>LSTM — Temporal Sequence</span></div>
         </div>
-        <div class="tech-ds">تُحلّل LSTM التتابع الزمني للإشارة عبر الإطارات المتعاقبة لفهم الإشارات الديناميكية.</div>
+        <div class="tech-ds">
+          <span data-ar>تُحلّل LSTM التتابع الزمني للإشارة عبر الإطارات المتعاقبة لفهم الإشارات الديناميكية.</span>
+          <span data-en>LSTM analyzes the temporal sequence of signs across consecutive frames to understand dynamic gestures.</span>
+        </div>
         <span class="tech-badge">Temporal Sequences</span>
       </div>
       <div class="tech-tile">
@@ -153,90 +319,172 @@
           <div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg></div>
           <div class="tech-nm">Transfer Learning</div>
         </div>
-        <div class="tech-ds">استخدام نماذج مدرَّبة مسبقاً ثم الضبط الدقيق لتخصيصها لمجموعة بيانات لغة الإشارة المحدودة.</div>
+        <div class="tech-ds">
+          <span data-ar>استخدام نماذج مدرَّبة مسبقاً ثم الضبط الدقيق لتخصيصها لمجموعة بيانات لغة الإشارة المحدودة.</span>
+          <span data-en>Using pre-trained models then fine-tuning them for the limited sign language dataset.</span>
+        </div>
         <span class="tech-badge">Fine-tuning</span>
       </div>
       <div class="tech-tile">
         <div class="tech-tile-top">
           <div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
-          <div class="tech-nm">YOLO — كشف الإشارة</div>
+          <div class="tech-nm"><span data-ar>YOLO — كشف الإشارة</span><span data-en>YOLO — Sign Detection</span></div>
         </div>
-        <div class="tech-ds">يُستخدم YOLO للكشف السريع عن الإشارة وتحديد موضعها في الإطار كخطوة أولى.</div>
+        <div class="tech-ds">
+          <span data-ar>يُستخدم YOLO للكشف السريع عن الإشارة وتحديد موضعها في الإطار كخطوة أولى.</span>
+          <span data-en>YOLO is used for rapid sign detection and localization within the frame as a first step.</span>
+        </div>
         <span class="tech-badge">Detection</span>
       </div>
     </div>
-    <div class="tech-section-title" style="margin-top:2rem">مجموعات البيانات المرجعية</div>
+
+    <div class="tech-section-title" style="margin-top:2rem">
+      <span data-ar>مجموعات البيانات المرجعية</span>
+      <span data-en>Reference Datasets</span>
+    </div>
     <div class="tech-grid">
       <div class="tech-tile">
         <div class="tech-tile-top"><div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><div class="tech-nm">WLASL Dataset</div></div>
-        <div class="tech-ds">مجموعة بيانات ضخمة لتعرّف لغة الإشارة على مستوى الكلمات تحتوي على أكثر من ٢٠٠٠ كلمة.</div>
-        <span class="tech-badge">+2000 كلمة</span>
+        <div class="tech-ds">
+          <span data-ar>مجموعة بيانات ضخمة لتعرّف لغة الإشارة على مستوى الكلمات تحتوي على أكثر من ٢٠٠٠ كلمة.</span>
+          <span data-en>A large-scale word-level sign language recognition dataset containing over 2,000 words.</span>
+        </div>
+        <span class="tech-badge"><span data-ar>+2000 كلمة</span><span data-en>+2000 words</span></span>
       </div>
       <div class="tech-tile">
         <div class="tech-tile-top"><div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><div class="tech-nm">ASL Alphabet</div></div>
-        <div class="tech-ds">مجموعة بيانات الحروف الهجائية الأمريكية لتدريب التعرّف على الحروف الفردية بدقة عالية.</div>
-        <span class="tech-badge">29 حرف</span>
+        <div class="tech-ds">
+          <span data-ar>مجموعة بيانات الحروف الهجائية الأمريكية لتدريب التعرّف على الحروف الفردية بدقة عالية.</span>
+          <span data-en>The American Sign Language alphabet dataset for training high-accuracy individual letter recognition.</span>
+        </div>
+        <span class="tech-badge"><span data-ar>29 حرف</span><span data-en>29 letters</span></span>
       </div>
-
     </div>
   </div>
 
   <!-- TAB 3 -->
   <div class="tech-tab-content" id="tab-infra">
-    <div class="tech-section-title">بيئة التطوير المحلية</div>
+    <div class="tech-section-title">
+      <span data-ar>بيئة التطوير المحلية</span>
+      <span data-en>Local Development Environment</span>
+    </div>
     <div class="tech-grid">
       <div class="tech-tile">
         <div class="tech-tile-top"><div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="tech-nm">Jupyter Notebook</div></div>
-        <div class="tech-ds">بيئة تطوير تفاعلية للنمذجة، تحليل البيانات، وعرض النتائج بشكل مرئي.</div>
+        <div class="tech-ds">
+          <span data-ar>بيئة تطوير تفاعلية للنمذجة، تحليل البيانات، وعرض النتائج بشكل مرئي.</span>
+          <span data-en>An interactive development environment for modeling, data analysis, and visual result presentation.</span>
+        </div>
       </div>
       <div class="tech-tile">
         <div class="tech-tile-top"><div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/></svg></div><div class="tech-nm">GitHub</div></div>
-        <div class="tech-ds">إدارة النسخ البرمجية، التعاون بين أعضاء الفريق، وتوثيق تاريخ التطوير.</div>
+        <div class="tech-ds">
+          <span data-ar>إدارة النسخ البرمجية، التعاون بين أعضاء الفريق، وتوثيق تاريخ التطوير.</span>
+          <span data-en>Version control management, team collaboration, and development history documentation.</span>
+        </div>
       </div>
       <div class="tech-tile">
         <div class="tech-tile-top"><div class="tech-ico-box"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="tech-nm">Flask / FastAPI</div></div>
-        <div class="tech-ds">إطار عمل للخادم الخلفي لعرض نموذج الذكاء الاصطناعي عبر واجهة برمجية (API).</div>
+        <div class="tech-ds">
+          <span data-ar>إطار عمل للخادم الخلفي لعرض نموذج الذكاء الاصطناعي عبر واجهة برمجية (API).</span>
+          <span data-en>A backend framework for serving the AI model via a programming interface (API).</span>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- TAB 4 -->
   <div class="tech-tab-content" id="tab-metrics">
-    <div class="tech-section-title">مقاييس التقييم المستمرة</div>
+    <div class="tech-section-title">
+      <span data-ar>مقاييس التقييم المستمرة</span>
+      <span data-en>Continuous Evaluation Metrics</span>
+    </div>
     <table class="metrics-table">
-      <thead><tr><th>المقياس</th><th>التعريف</th><th>الاستخدام في المشروع</th><th>النوع</th></tr></thead>
+      <thead>
+        <tr>
+          <th><span data-ar>المقياس</span><span data-en>Metric</span></th>
+          <th><span data-ar>التعريف</span><span data-en>Definition</span></th>
+          <th><span data-ar>الاستخدام في المشروع</span><span data-en>Use in Project</span></th>
+          <th><span data-ar>النوع</span><span data-en>Type</span></th>
+        </tr>
+      </thead>
       <tbody>
-        <tr><td><strong>RMSE</strong></td><td>جذر متوسط مربّع الخطأ بين القيم المتوقّعة والفعلية</td><td>قياس دقة إحداثيات نقاط المعالم المتوقّعة</td><td><span class="metric-pill">مستمر</span></td></tr>
-        <tr><td><strong>MAE</strong></td><td>متوسط القيمة المطلقة للخطأ</td><td>مقياس مكمّل لـ RMSE في تقييم دقة الموضع</td><td><span class="metric-pill">مستمر</span></td></tr>
+        <tr>
+          <td><strong>RMSE</strong></td>
+          <td><span data-ar>جذر متوسط مربّع الخطأ بين القيم المتوقّعة والفعلية</span><span data-en>Root mean square error between predicted and actual values</span></td>
+          <td><span data-ar>قياس دقة إحداثيات نقاط المعالم المتوقّعة</span><span data-en>Measuring accuracy of predicted landmark coordinates</span></td>
+          <td><span class="metric-pill"><span data-ar>مستمر</span><span data-en>Continuous</span></span></td>
+        </tr>
+        <tr>
+          <td><strong>MAE</strong></td>
+          <td><span data-ar>متوسط القيمة المطلقة للخطأ</span><span data-en>Mean absolute error value</span></td>
+          <td><span data-ar>مقياس مكمّل لـ RMSE في تقييم دقة الموضع</span><span data-en>A complementary metric to RMSE in evaluating position accuracy</span></td>
+          <td><span class="metric-pill"><span data-ar>مستمر</span><span data-en>Continuous</span></span></td>
+        </tr>
       </tbody>
     </table>
-    <div class="tech-section-title" style="margin-top:2rem">مقاييس التصنيف</div>
+
+    <div class="tech-section-title" style="margin-top:2rem">
+      <span data-ar>مقاييس التصنيف</span>
+      <span data-en>Classification Metrics</span>
+    </div>
     <table class="metrics-table">
-      <thead><tr><th>المقياس</th><th>التعريف</th><th>الاستخدام في المشروع</th><th>النوع</th></tr></thead>
+      <thead>
+        <tr>
+          <th><span data-ar>المقياس</span><span data-en>Metric</span></th>
+          <th><span data-ar>التعريف</span><span data-en>Definition</span></th>
+          <th><span data-ar>الاستخدام في المشروع</span><span data-en>Use in Project</span></th>
+          <th><span data-ar>النوع</span><span data-en>Type</span></th>
+        </tr>
+      </thead>
       <tbody>
-        <tr><td><strong>الدقة (Accuracy)</strong></td><td>نسبة التنبؤات الصحيحة من إجمالي العيّنات</td><td>المقياس الأساسي لأداء التصنيف العام للإشارات</td><td><span class="metric-pill">تصنيف</span></td></tr>
-        <tr><td><strong>الضبط (Precision)</strong></td><td>نسبة الإيجابيات الصحيحة من إجمالي الإيجابيات المتوقّعة</td><td>قياس مدى موثوقية تنبؤات الإشارة</td><td><span class="metric-pill">تصنيف</span></td></tr>
-        <tr><td><strong>الاستدعاء (Recall)</strong></td><td>نسبة الإيجابيات الصحيحة المكتشَفة من إجمالي الإيجابيات الفعلية</td><td>قياس قدرة النموذج على اكتشاف جميع حالات الإشارة</td><td><span class="metric-pill">تصنيف</span></td></tr>
-        <tr><td><strong>F1-Score</strong></td><td>المتوسط التوافقي بين الضبط والاستدعاء</td><td>المقياس الموحّد للتوازن بين الضبط والاستدعاء</td><td><span class="metric-pill">تصنيف</span></td></tr>
+        <tr>
+          <td><strong><span data-ar>الدقة (Accuracy)</span><span data-en>Accuracy</span></strong></td>
+          <td><span data-ar>نسبة التنبؤات الصحيحة من إجمالي العيّنات</span><span data-en>Ratio of correct predictions to total samples</span></td>
+          <td><span data-ar>المقياس الأساسي لأداء التصنيف العام للإشارات</span><span data-en>The primary metric for overall sign classification performance</span></td>
+          <td><span class="metric-pill"><span data-ar>تصنيف</span><span data-en>Classification</span></span></td>
+        </tr>
+        <tr>
+          <td><strong><span data-ar>الضبط (Precision)</span><span data-en>Precision</span></strong></td>
+          <td><span data-ar>نسبة الإيجابيات الصحيحة من إجمالي الإيجابيات المتوقّعة</span><span data-en>Ratio of true positives to all predicted positives</span></td>
+          <td><span data-ar>قياس مدى موثوقية تنبؤات الإشارة</span><span data-en>Measuring the reliability of sign predictions</span></td>
+          <td><span class="metric-pill"><span data-ar>تصنيف</span><span data-en>Classification</span></span></td>
+        </tr>
+        <tr>
+          <td><strong><span data-ar>الاستدعاء (Recall)</span><span data-en>Recall</span></strong></td>
+          <td><span data-ar>نسبة الإيجابيات الصحيحة المكتشَفة من إجمالي الإيجابيات الفعلية</span><span data-en>Ratio of correctly detected positives to all actual positives</span></td>
+          <td><span data-ar>قياس قدرة النموذج على اكتشاف جميع حالات الإشارة</span><span data-en>Measuring the model's ability to detect all sign instances</span></td>
+          <td><span class="metric-pill"><span data-ar>تصنيف</span><span data-en>Classification</span></span></td>
+        </tr>
+        <tr>
+          <td><strong>F1-Score</strong></td>
+          <td><span data-ar>المتوسط التوافقي بين الضبط والاستدعاء</span><span data-en>The harmonic mean of Precision and Recall</span></td>
+          <td><span data-ar>المقياس الموحّد للتوازن بين الضبط والاستدعاء</span><span data-en>The unified metric balancing Precision and Recall</span></td>
+          <td><span class="metric-pill"><span data-ar>تصنيف</span><span data-en>Classification</span></span></td>
+        </tr>
       </tbody>
     </table>
+
     <div style="margin-top:2rem;background:var(--teal-lt);border:1px solid rgba(61,121,112,.18);border-radius:14px;padding:1.4rem 1.6rem">
-      <div style="font-size:.9rem;font-weight:800;color:var(--teal2);margin-bottom:.8rem">الأهداف المتوقّعة</div>
+      <div style="font-size:.9rem;font-weight:800;color:var(--teal2);margin-bottom:.8rem">
+        <span data-ar>الأهداف المتوقّعة</span>
+        <span data-en>Expected Targets</span>
+      </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
         <div style="text-align:center;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:.9rem">
-          <div style="font-size:1.5rem;font-weight:900;color:var(--teal)">٩٥٪+</div>
+          <div style="font-size:1.5rem;font-weight:900;color:var(--teal)">95٪+</div>
           <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-top:3px">Accuracy</div>
         </div>
         <div style="text-align:center;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:.9rem">
-          <div style="font-size:1.5rem;font-weight:900;color:var(--teal)">٩٣٪+</div>
+          <div style="font-size:1.5rem;font-weight:900;color:var(--teal)">93٪+</div>
           <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-top:3px">Precision</div>
         </div>
         <div style="text-align:center;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:.9rem">
-          <div style="font-size:1.5rem;font-weight:900;color:var(--teal)">٩٢٪+</div>
+          <div style="font-size:1.5rem;font-weight:900;color:var(--teal)">92٪+</div>
           <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-top:3px">Recall</div>
         </div>
         <div style="text-align:center;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:.9rem">
-          <div style="font-size:1.5rem;font-weight:900;color:var(--teal)">٩٣٪+</div>
+          <div style="font-size:1.5rem;font-weight:900;color:var(--teal)">93٪+</div>
           <div style="font-size:.8rem;font-weight:700;color:var(--muted);margin-top:3px">F1-Score</div>
         </div>
       </div>
@@ -244,21 +492,55 @@
   </div>
 
 </div>
-
 </div>
+
 <div class="foot">
-  <div><div class="foot-title">إشارة AI — مشروع التخرج</div><div class="foot-sub">جامعة الطائف · قسم علوم الحاسب ٢٠٢٥-٢٠٢٦</div></div>
-  <div class="foot-nav"><a href="index.html">الرئيسية</a><a href="demo.html">النموذج</a><a href="how.html">آلية العمل</a><a href="tech.html">التقنيات</a></div>
-  <div class="foot-badge">جامعة الطائف · ٢٠٢٥-٢٠٢٦</div>
+  <div>
+    <div class="foot-title"><span data-ar>إشارة AI — مشروع التخرج</span><span data-en>Ishara AI — Graduation Project</span></div>
+    <div class="foot-sub"><span data-ar>جامعة الطائف · قسم علوم الحاسب ٢٠٢٥-٢٠٢٦</span><span data-en>Taif University · Computer Science Dept. 2025–2026</span></div>
+  </div>
+  <div class="foot-nav">
+    <a href="index.html"><span data-ar>الرئيسية</span><span data-en>Home</span></a>
+    <a href="demo.html"><span data-ar>النموذج</span><span data-en>Demo</span></a>
+    <a href="how.html"><span data-ar>آلية العمل</span><span data-en>How It Works</span></a>
+    <a href="tech.html"><span data-ar>التقنيات</span><span data-en>Technology</span></a>
+  </div>
+  <div class="foot-badge"><span data-ar>جامعة الطائف · ٢٠٢٥-٢٠٢٦</span><span data-en>Taif University · 2025–2026</span></div>
 </div>
 
 <script>
-function showTab(id, btn){
-  document.querySelectorAll('.tech-tab-content').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tech-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  btn.classList.add('active');
-}
+  const html   = document.documentElement;
+  const pillAr = document.getElementById('pillAr');
+  const pillEn = document.getElementById('pillEn');
+  const toggle = document.getElementById('langToggle');
+
+  // Restore saved preference (default: Arabic)
+  applyLang(localStorage.getItem('ishara-lang') || 'ar');
+
+  toggle.addEventListener('click', () => {
+    const next = html.lang === 'ar' ? 'en' : 'ar';
+    document.body.classList.add('lang-switching');
+    setTimeout(() => {
+      applyLang(next);
+      localStorage.setItem('ishara-lang', next);
+      document.body.classList.remove('lang-switching');
+    }, 180);
+  });
+
+  function applyLang(lang) {
+    html.lang = lang;
+    html.dir  = lang === 'ar' ? 'rtl' : 'ltr';
+    document.title = lang === 'ar' ? 'إشارة AI — التقنيات' : 'Ishara AI — Technology';
+    pillAr.classList.toggle('active', lang === 'ar');
+    pillEn.classList.toggle('active', lang === 'en');
+  }
+
+  function showTab(id, btn) {
+    document.querySelectorAll('.tech-tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tech-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
 </script>
 </body>
 </html>
