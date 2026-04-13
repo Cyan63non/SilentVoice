@@ -2,19 +2,19 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --sand:     #f7f2ea;
-  --sand2:    #ede5d5;
-  --sand3:    #ddd3bc;
-  --ink:      #2a2018;
-  --ink2:     #57493a;
-  --muted:    #998878;
-  --teal:     #3c7970;
-  --teal2:    #2d5c55;
+  --sand:     #eaf0f7;
+  --sand2:    #d5d9ed;
+  --sand3:    #bcc9dd;
+  --ink:      #181a2a;
+  --ink2:     #3b3a57;
+  --muted:    #787d99;
+  --teal:     #5470a9;
+  --teal2:    #33475c;
   --teal-lt:  #eaf2f0;
-  --amber:    #b5820a;
-  --amber-lt: #fdf5e0;
+  --amber:    #0e0927;
+  --amber-lt: #e0f0fd;
   --border:   rgba(42,32,24,0.1);
-  --white:    #fffdf8;
+  --white:    #f8fcff;
   --font:     'Tajawal', 'Noto Sans Arabic', sans-serif;
 }
 
@@ -196,9 +196,9 @@ nav {
 }
 .cam-dots-ui { display: flex; gap: 6px; }
 .cam-dots-ui span { width: 10px; height: 10px; border-radius: 50%; }
-.cam-dots-ui span:nth-child(1) { background: #ddd3bc; }
-.cam-dots-ui span:nth-child(2) { background: #c9b89e; }
-.cam-dots-ui span:nth-child(3) { background: #b5a488; }
+.cam-dots-ui span:nth-child(1) { background: #bcbfdd; }
+.cam-dots-ui span:nth-child(2) { background: #9ea5c9; }
+.cam-dots-ui span:nth-child(3) { background: #8889b5; }
 .cam-label { font-size: .78rem; font-weight: 700; color: var(--muted); }
 .cam-rec { display: flex; align-items: center; gap: 5px; font-size: .78rem; font-weight: 800; color: #c0392b; opacity: 0; transition: opacity .3s; }
 .rec-dot { width: 7px; height: 7px; border-radius: 50%; background: #c0392b; animation: blink-rec 1.2s ease-in-out infinite; }
