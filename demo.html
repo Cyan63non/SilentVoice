@@ -206,7 +206,10 @@
 <div id="toast"></div>
 
 <script>
-/* ── Camera & detection logic (language-independent) ── */
+/* ── Config ── */
+var API = 'https://naiiiiififif-simplemodel.hf.space';
+
+/* ── DOM refs ── */
 var vp        = document.getElementById('cam-vp'),
     feed      = document.getElementById('cam-feed'),
     offMsg    = document.getElementById('off-msg'),
@@ -223,19 +226,17 @@ var vp        = document.getElementById('cam-vp'),
     ctx       = canvas.getContext('2d'),
     corners   = document.querySelectorAll('.corner');
 
-var active = false, detInterval, rafId, signIdx = 0;
-
-var signs = [
-  { ar:'مرحباً',     en:'Hello',       conf:92, sentAr:'مرحباً، كيف حالك؟',                    sentEn:'Hello, how are you?' },
-  { ar:'شكراً',      en:'Thank you',   conf:88, sentAr:'شكراً جزيلاً على مساعدتك.',            sentEn:'Thank you so much for your help.' },
-  { ar:'من فضلك',    en:'Please',      conf:90, sentAr:'من فضلك، هل يمكنك مساعدتي؟',          sentEn:'Please, can you help me?' },
-  { ar:'نعم',        en:'Yes',         conf:96, sentAr:'نعم، هذا صحيح تماماً.',                sentEn:'Yes, that is absolutely correct.' },
-  { ar:'لا',         en:'No',          conf:94, sentAr:'لا، لم أقصد ذلك.',                    sentEn:'No, I did not mean that.' },
-  { ar:'ماء',        en:'Water',       conf:91, sentAr:'أحتاج إلى ماء من فضلك.',              sentEn:'I need water please.' },
-  { ar:'مساعدة',     en:'Help',        conf:86, sentAr:'أحتاج إلى مساعدة عاجلة.',             sentEn:'I need urgent help.' },
-  { ar:'أحبك',       en:'I love you',  conf:95, sentAr:'أحبك وأقدّر وجودك.',                  sentEn:'I love you and appreciate your presence.' },
-  { ar:'صباح الخير', en:'Good morning',conf:89, sentAr:'صباح الخير، أتمنى لك يوماً سعيداً.',  sentEn:'Good morning, I hope you have a wonderful day.' },
-];
+/* ── State ── */
+var active    = false;
+var rafId     = null;
+var running   = false;
+var buffer    = [];           // keypoint sequences, max 30
+var sentWords = [];           // sentence words
+var THRESHOLD = 0.75;
+var SMOOTHING = 6;
+var voteHistory = [];
+var captureCanvas = document.createElement('canvas');
+var captureCtx    = captureCanvas.getContext('2d');
 
 function toast(m) {
   var t = document.getElementById('toast');
@@ -245,6 +246,7 @@ function toast(m) {
 
 function getLang() { return document.documentElement.lang || 'ar'; }
 
+/* ── Camera start ── */
 function startCam() {
   navigator.mediaDevices.getUserMedia({ video: { facingMode:'user', width:{ ideal:1280 } } })
     .then(function(stream) {
@@ -255,7 +257,8 @@ function startCam() {
       corners.forEach(function(c){ c.style.display = 'block'; });
       active = true;
       toast(getLang() === 'ar' ? 'تمّ تفعيل الكاميرا ✓' : 'Camera activated ✓');
-      startDet(); drawLoop();
+      drawLoop();
+      startDetection();
     })
     .catch(function(){ toast(getLang() === 'ar' ? 'تعذّر الوصول إلى الكاميرا' : 'Could not access camera'); });
 }
@@ -263,22 +266,101 @@ function startCam() {
 vp.addEventListener('click',     function(){ if (!active) startCam(); });
 playBtn.addEventListener('click', function(e){ e.stopPropagation(); if (!active) startCam(); });
 
-function startDet() {
-  detInterval = setInterval(function() {
-    var s = signs[signIdx % signs.length]; signIdx++;
-    var lang = getLang();
-    arWord.style.opacity = '0'; confNum.style.opacity = '0';
-    setTimeout(function() {
-      arWord.textContent  = lang === 'ar' ? s.ar : s.en;
-      confNum.textContent = s.conf + (lang === 'ar' ? '٪' : '%');
-      arWord.style.opacity = '1'; confNum.style.opacity = '1';
-      cf1.style.width = s.conf + '%';
-      cf2.style.width = s.conf + '%';
-      sentence.textContent = lang === 'ar' ? s.sentAr : s.sentEn;
-    }, 280);
-  }, 2500);
+/* ── Capture frame as JPEG blob ── */
+function captureFrame() {
+  captureCanvas.width  = feed.videoWidth  || 640;
+  captureCanvas.height = feed.videoHeight || 480;
+  captureCtx.drawImage(feed, 0, 0, captureCanvas.width, captureCanvas.height);
+  return new Promise(function(resolve) {
+    captureCanvas.toBlob(resolve, 'image/jpeg', 0.8);
+  });
 }
 
+/* ── Update UI ── */
+function showResult(label, confidence) {
+  arWord.style.opacity = '0'; confNum.style.opacity = '0';
+  setTimeout(function() {
+    arWord.textContent  = label;
+    var confPct = Math.round(confidence * 100);
+    confNum.textContent = confPct + (getLang() === 'ar' ? '٪' : '%');
+    cf1.style.width = confPct + '%';
+    cf2.style.width = confPct + '%';
+    arWord.style.opacity  = '1';
+    confNum.style.opacity = '1';
+  }, 180);
+}
+
+function addToSentence(word) {
+  if (word.toLowerCase() === 'idle') return;
+  if (sentWords.length && sentWords[sentWords.length - 1] === word) return;
+  sentWords.push(word);
+  if (sentWords.length > 10) sentWords.shift();
+  sentence.textContent = sentWords.join(' ');
+}
+
+/* ── Main detection loop ── */
+function startDetection() {
+  if (running) return;
+  running = true;
+
+  function loop() {
+    if (!active) { setTimeout(loop, 200); return; }
+
+    captureFrame().then(function(blob) {
+      var fd = new FormData();
+      fd.append('file', blob, 'frame.jpg');
+
+      fetch(API + '/keypoints', { method: 'POST', body: fd })
+        .then(function(r){ return r.json(); })
+        .then(function(data) {
+          buffer.push(data.keypoints);
+          
+
+          // Show buffer fill progress visually
+          var pct = Math.round((buffer.length / 30) * 100);
+          cf1.style.width = pct + '%';
+
+          if (buffer.length >= 30) {
+            // Send full sequence for prediction
+            fetch(API + '/predict', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ sequence: buffer })
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(result) {
+              buffer = []; // clear buffer
+
+              if (result.confidence >= THRESHOLD) {
+                // Voting/smoothing
+                voteHistory.push(result.label);
+                if (voteHistory.length > SMOOTHING) voteHistory.shift();
+
+                var votes = voteHistory.filter(function(v){ return v === result.label; }).length;
+                if (votes >= Math.round(SMOOTHING * 0.6)) {
+                  showResult(result.label, result.confidence);
+                  addToSentence(result.label);
+                  voteHistory = [];
+                }
+              }
+            })
+            .catch(function(e){ console.error('predict error', e); });
+          }
+
+          // Continue loop
+          setTimeout(loop, 100); // ~10 frames/sec to avoid overloading free tier
+        })
+        .catch(function(e) {
+          console.error('keypoints error', e);
+          setTimeout(loop, 500);
+        });
+    });
+  }
+
+  loop();
+}
+
+/* ── Decorative hand drawing loop ── */
 function drawLoop() {
   function loop() {
     if (!active) { rafId = requestAnimationFrame(loop); return; }
@@ -316,9 +398,11 @@ function drawLoop() {
 }
 
 window.addEventListener('beforeunload', function() {
-  clearInterval(detInterval); cancelAnimationFrame(rafId);
+  active = false; running = false;
+  cancelAnimationFrame(rafId);
   if (feed.srcObject) feed.srcObject.getTracks().forEach(function(t){ t.stop(); });
 });
+
 </script>
 </body>
 </html>
