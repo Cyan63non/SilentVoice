@@ -206,203 +206,279 @@
 <div id="toast"></div>
 
 <script>
-/* ── Config ── */
 var API = 'https://naiiiiififif-simplemodel.hf.space';
-
+ 
 /* ── DOM refs ── */
-var vp        = document.getElementById('cam-vp'),
-    feed      = document.getElementById('cam-feed'),
-    offMsg    = document.getElementById('off-msg'),
-    recInd    = document.getElementById('rec-ind'),
-    liveBadge = document.getElementById('live-badge'),
-    scanRing  = document.getElementById('scan-ring'),
-    playBtn   = document.getElementById('play-btn'),
-    arWord    = document.getElementById('ar-word'),
-    confNum   = document.getElementById('conf-num'),
-    sentence  = document.getElementById('sentence'),
-    cf1       = document.getElementById('cf1'),
-    cf2       = document.getElementById('cf2'),
-    canvas    = document.getElementById('lm-canvas'),
-    ctx       = canvas.getContext('2d'),
-    corners   = document.querySelectorAll('.corner');
-
+var vp = document.getElementById('cam-vp'),
+feed = document.getElementById('cam-feed'),
+offMsg = document.getElementById('off-msg'),
+recInd = document.getElementById('rec-ind'),
+liveBadge = document.getElementById('live-badge'),
+scanRing = document.getElementById('scan-ring'),
+playBtn = document.getElementById('play-btn'),
+arWord = document.getElementById('ar-word'),
+confNum = document.getElementById('conf-num'),
+sentence = document.getElementById('sentence'),
+cf1 = document.getElementById('cf1'),
+cf2 = document.getElementById('cf2'),
+canvas = document.getElementById('lm-canvas'),
+ctx = canvas.getContext('2d'),
+corners = document.querySelectorAll('.corner');
+ 
 /* ── State ── */
-var active    = false;
-var rafId     = null;
-var running   = false;
-var buffer    = [];           // keypoint sequences, max 30
-var sentWords = [];           // sentence words
+var active = false;
+var running = false;
+var rafId = null;
+var buffer = [];
+var sentWords = [];
+var voteHistory = [];
 var THRESHOLD = 0.75;
 var SMOOTHING = 6;
-var voteHistory = [];
 var captureCanvas = document.createElement('canvas');
-var captureCtx    = captureCanvas.getContext('2d');
-
+var captureCtx = captureCanvas.getContext('2d');
+ 
+/* ── Debug stats ── */
+var stats = {
+framesCapture : 0,
+framesSent : 0,
+predictions : 0,
+errors : 0,
+lastKpMs : 0,
+lastPredMs : 0,
+startTime : null,
+lastLabel : '—',
+lastConf : 0,
+};
+ 
+/* ── Inject debug panel ── */
+var debugPanel = document.createElement('div');
+debugPanel.id = 'debug-panel';
+debugPanel.style.cssText = [
+'position:fixed', 'bottom:16px', 'left:16px', 'z-index:9999',
+'background:rgba(10,20,18,0.92)', 'color:#7effd4',
+'font:12px/1.7 monospace', 'padding:10px 14px',
+'border-radius:10px', 'border:1px solid rgba(61,121,112,.4)',
+'min-width:260px', 'pointer-events:none',
+'backdrop-filter:blur(6px)',
+].join(';');
+document.body.appendChild(debugPanel);
+ 
+function updateDebug() {
+var elapsed = stats.startTime ? ((Date.now() - stats.startTime) / 1000).toFixed(1) : '0';
+var fps = elapsed > 0 ? (stats.framesSent / elapsed).toFixed(1) : '0';
+debugPanel.innerHTML = [
+'<b style="color:#22d3ee">🟢 HandTalker Debug</b>',
+'──────────────────────',
+'⏱️ Uptime : ' + elapsed + 's',
+'📸 Frames sent : ' + stats.framesSent,
+'⚡️ Effective fps : ' + fps + '/s',
+'🔁 Buffer : ' + buffer.length + ' / 30',
+'🧠 Predictions : ' + stats.predictions,
+'❌ Errors : ' + stats.errors,
+'─── Latency ───────────',
+'📡 /keypoints : ' + stats.lastKpMs + 'ms',
+'🤖 /predict : ' + stats.lastPredMs + 'ms',
+'─── Last Result ────────',
+'🏷 Label : ' + stats.lastLabel,
+'📊 Confidence : ' + (stats.lastConf * 100).toFixed(1) + '%',
+].join('<br>');
+}
+ 
+setInterval(updateDebug, 300);
+ 
+/* ── Helpers ── */
 function toast(m) {
-  var t = document.getElementById('toast');
-  t.textContent = m; t.classList.add('show');
-  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+var t = document.getElementById('toast');
+t.textContent = m; t.classList.add('show');
+setTimeout(function(){ t.classList.remove('show'); }, 3000);
 }
-
+ 
 function getLang() { return document.documentElement.lang || 'ar'; }
-
-/* ── Camera start ── */
-function startCam() {
-  navigator.mediaDevices.getUserMedia({ video: { facingMode:'user', width:{ ideal:1280 } } })
-    .then(function(stream) {
-      feed.srcObject = stream; feed.style.display = 'block';
-      offMsg.style.opacity = '0'; playBtn.style.display = 'none';
-      recInd.style.opacity = '1'; liveBadge.style.display = 'block';
-      scanRing.style.display = 'block'; canvas.style.display = 'block';
-      corners.forEach(function(c){ c.style.display = 'block'; });
-      active = true;
-      toast(getLang() === 'ar' ? 'تمّ تفعيل الكاميرا ✓' : 'Camera activated ✓');
-      drawLoop();
-      startDetection();
-    })
-    .catch(function(){ toast(getLang() === 'ar' ? 'تعذّر الوصول إلى الكاميرا' : 'Could not access camera'); });
-}
-
-vp.addEventListener('click',     function(){ if (!active) startCam(); });
-playBtn.addEventListener('click', function(e){ e.stopPropagation(); if (!active) startCam(); });
-
-/* ── Capture frame as JPEG blob ── */
+ 
 function captureFrame() {
-  captureCanvas.width  = feed.videoWidth  || 640;
-  captureCanvas.height = feed.videoHeight || 480;
-  captureCtx.drawImage(feed, 0, 0, captureCanvas.width, captureCanvas.height);
-  return new Promise(function(resolve) {
-    captureCanvas.toBlob(resolve, 'image/jpeg', 0.8);
-  });
-}
-
-/* ── Update UI ── */
-function showResult(label, confidence) {
-  arWord.style.opacity = '0'; confNum.style.opacity = '0';
-  setTimeout(function() {
-    arWord.textContent  = label;
-    var confPct = Math.round(confidence * 100);
-    confNum.textContent = confPct + (getLang() === 'ar' ? '٪' : '%');
-    cf1.style.width = confPct + '%';
-    cf2.style.width = confPct + '%';
-    arWord.style.opacity  = '1';
-    confNum.style.opacity = '1';
-  }, 180);
-}
-
-function addToSentence(word) {
-  if (word.toLowerCase() === 'idle') return;
-  if (sentWords.length && sentWords[sentWords.length - 1] === word) return;
-  sentWords.push(word);
-  if (sentWords.length > 10) sentWords.shift();
-  sentence.textContent = sentWords.join(' ');
-}
-
-/* ── Main detection loop ── */
-function startDetection() {
-  if (running) return;
-  running = true;
-
-  function loop() {
-    if (!active) { setTimeout(loop, 200); return; }
-
-    captureFrame().then(function(blob) {
-      var fd = new FormData();
-      fd.append('file', blob, 'frame.jpg');
-
-      fetch(API + '/keypoints', { method: 'POST', body: fd })
-        .then(function(r){ return r.json(); })
-        .then(function(data) {
-          buffer.push(data.keypoints);
-          
-
-          // Show buffer fill progress visually
-          var pct = Math.round((buffer.length / 30) * 100);
-          cf1.style.width = pct + '%';
-
-          if (buffer.length >= 30) {
-            // Send full sequence for prediction
-            fetch(API + '/predict', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ sequence: buffer })
-            })
-            .then(function(r){ return r.json(); })
-            .then(function(result) {
-              buffer = []; // clear buffer
-
-              if (result.confidence >= THRESHOLD) {
-                // Voting/smoothing
-                voteHistory.push(result.label);
-                if (voteHistory.length > SMOOTHING) voteHistory.shift();
-
-                var votes = voteHistory.filter(function(v){ return v === result.label; }).length;
-                if (votes >= Math.round(SMOOTHING * 0.6)) {
-                  showResult(result.label, result.confidence);
-                  addToSentence(result.label);
-                  voteHistory = [];
-                }
-              }
-            })
-            .catch(function(e){ console.error('predict error', e); });
-          }
-
-          // Continue loop
-          setTimeout(loop, 100); // ~10 frames/sec to avoid overloading free tier
-        })
-        .catch(function(e) {
-          console.error('keypoints error', e);
-          setTimeout(loop, 500);
-        });
-    });
-  }
-
-  loop();
-}
-
-/* ── Decorative hand drawing loop ── */
-function drawLoop() {
-  function loop() {
-    if (!active) { rafId = requestAnimationFrame(loop); return; }
-    var W = canvas.offsetWidth, H = canvas.offsetHeight;
-    canvas.width = W; canvas.height = H; ctx.clearRect(0, 0, W, H);
-    var t  = Date.now() / 1000,
-        cx = W * .5  + Math.sin(t * .7) * W * .04,
-        cy = H * .46 + Math.cos(t * .5) * H * .035;
-    var palm = [[cx,cy],[cx-W*.065,cy+H*.065],[cx-W*.04,cy+H*.14],[cx+W*.04,cy+H*.14],[cx+W*.065,cy+H*.065]];
-    ctx.beginPath(); ctx.moveTo(palm[0][0], palm[0][1]);
-    palm.forEach(function(p){ ctx.lineTo(p[0], p[1]); }); ctx.closePath();
-    ctx.strokeStyle = 'rgba(61,121,112,.5)'; ctx.lineWidth = 1.5; ctx.stroke();
-    var fingers = [
-      { b:[cx-W*.075,cy],      tip:[cx-W*.095,cy-H*.14] },
-      { b:[cx-W*.03,cy-H*.02], tip:[cx-W*.033,cy-H*.18] },
-      { b:[cx+W*.01,cy-H*.02], tip:[cx+W*.01, cy-H*.19] },
-      { b:[cx+W*.05,cy],       tip:[cx+W*.065,cy-H*.16] },
-      { b:[cx+W*.08,cy+H*.03], tip:[cx+W*.125,cy-H*.04] },
-    ];
-    fingers.forEach(function(f, i) {
-      var w = Math.sin(t * 1.2 + i * .9) * H * .013;
-      ctx.beginPath(); ctx.moveTo(f.b[0], f.b[1]); ctx.lineTo(f.tip[0], f.tip[1] + w);
-      ctx.strokeStyle = 'rgba(61,121,112,.45)'; ctx.lineWidth = 1.2; ctx.stroke();
-      var mid = [(f.b[0]+f.tip[0])/2, (f.b[1]+f.tip[1])/2+w/2];
-      [f.b, mid, [f.tip[0], f.tip[1]+w]].forEach(function(p) {
-        ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, Math.PI*2);
-        ctx.fillStyle = 'rgba(61,121,112,.65)'; ctx.fill();
-      });
-    });
-    ctx.beginPath(); ctx.arc(cx, cy+H*.1, 4.5, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(34,211,238,0.7)'; ctx.fill();
-    rafId = requestAnimationFrame(loop);
-  }
-  loop();
-}
-
-window.addEventListener('beforeunload', function() {
-  active = false; running = false;
-  cancelAnimationFrame(rafId);
-  if (feed.srcObject) feed.srcObject.getTracks().forEach(function(t){ t.stop(); });
+captureCanvas.width = feed.videoWidth || 640;
+captureCanvas.height = feed.videoHeight || 480;
+captureCtx.drawImage(feed, 0, 0, captureCanvas.width, captureCanvas.height);
+return new Promise(function(resolve) {
+captureCanvas.toBlob(resolve, 'image/jpeg', 0.8);
 });
-
+}
+ 
+function showResult(label, confidence) {
+arWord.style.opacity = '0'; confNum.style.opacity = '0';
+setTimeout(function() {
+arWord.textContent = label;
+var confPct = Math.round(confidence * 100);
+confNum.textContent = confPct + (getLang() === 'ar' ? '٪' : '%');
+cf1.style.width = confPct + '%';
+cf2.style.width = confPct + '%';
+arWord.style.opacity = '1';
+confNum.style.opacity = '1';
+}, 180);
+}
+ 
+function addToSentence(word) {
+if (word.toLowerCase() === 'idle') return;
+if (sentWords.length && sentWords[sentWords.length - 1] === word) return;
+sentWords.push(word);
+if (sentWords.length > 10) sentWords.shift();
+sentence.textContent = sentWords.join(' ');
+}
+ 
+/* ── Camera ── */
+function startCam() {
+navigator.mediaDevices.getUserMedia({ video: { facingMode:'user', width:{ ideal:1280 } } })
+.then(function(stream) {
+feed.srcObject = stream; feed.style.display = 'block';
+offMsg.style.opacity = '0'; playBtn.style.display = 'none';
+recInd.style.opacity = '1'; liveBadge.style.display = 'block';
+scanRing.style.display = 'block'; canvas.style.display = 'block';
+corners.forEach(function(c){ c.style.display = 'block'; });
+active = true;
+stats.startTime = Date.now();
+console.log('[HandTalker] Camera started');
+toast(getLang() === 'ar' ? 'تمّ تفعيل الكاميرا ✓' : 'Camera activated ✓');
+drawLoop();
+startDetection();
+})
+.catch(function(err){
+console.error('[HandTalker] Camera error:', err);
+toast(getLang() === 'ar' ? 'تعذّر الوصول إلى الكاميرا' : 'Could not access camera');
+});
+}
+ 
+vp.addEventListener('click', function(){ if (!active) startCam(); });
+playBtn.addEventListener('click', function(e){ e.stopPropagation(); if (!active) startCam(); });
+ 
+/* ── Detection loop — runs as fast as network allows ── */
+function startDetection() {
+if (running) return;
+running = true;
+console.log('[HandTalker] Detection loop started. API:', API);
+ 
+function loop() {
+if (!active) { setTimeout(loop, 200); return; }
+ 
+captureFrame().then(function(blob) {
+stats.framesSent++;
+var t0 = Date.now();
+ 
+var fd = new FormData();
+fd.append('file', blob, 'frame.jpg');
+ 
+fetch(API + '/keypoints', { method: 'POST', body: fd })
+.then(function(r) { return r.json(); })
+.then(function(data) {
+stats.lastKpMs = Date.now() - t0;
+buffer.push(data.keypoints);
+ 
+// Show buffer fill on confidence bar while collecting
+cf1.style.width = Math.round((buffer.length / 30) * 100) + '%';
+ 
+console.log('[kp] frame', stats.framesSent,
+'| buffer:', buffer.length + '/30',
+'| hands:', data.hands_detected,
+'| latency:', stats.lastKpMs + 'ms');
+ 
+if (buffer.length >= 30) {
+var t1 = Date.now();
+var seq = buffer.slice(); // copy
+buffer = []; // clear immediately so loop continues
+ 
+fetch(API + '/predict', {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ sequence: seq })
+})
+.then(function(r) { return r.json(); })
+.then(function(result) {
+stats.lastPredMs = Date.now() - t1;
+stats.predictions++;
+stats.lastLabel = result.label;
+stats.lastConf = result.confidence;
+ 
+console.log('[pred] label:', result.label,
+'| conf:', (result.confidence * 100).toFixed(1) + '%',
+'| top3:', result.top3.map(function(x){ return x.label + '(' + (x.confidence*100).toFixed(0) + '%)'; }).join(', '),
+'| latency:', stats.lastPredMs + 'ms');
+ 
+if (result.confidence >= THRESHOLD) {
+voteHistory.push(result.label);
+if (voteHistory.length > SMOOTHING) voteHistory.shift();
+var votes = voteHistory.filter(function(v){ return v === result.label; }).length;
+if (votes >= Math.round(SMOOTHING * 0.6)) {
+console.log('[vote] ✅ accepted:', result.label, '| votes:', votes + '/' + SMOOTHING);
+showResult(result.label, result.confidence);
+addToSentence(result.label);
+voteHistory = [];
+} else {
+console.log('[vote] ⏳ waiting for more votes:', result.label, votes + '/' + Math.round(SMOOTHING * 0.6));
+}
+} else {
+console.log('[pred] ⬇️ below threshold:', (result.confidence * 100).toFixed(1) + '% < ' + (THRESHOLD * 100) + '%');
+}
+})
+.catch(function(e) {
+stats.errors++;
+console.error('[HandTalker] /predict error:', e);
+});
+}
+ 
+loop(); // next frame immediately
+})
+.catch(function(e) {
+stats.errors++;
+console.error('[HandTalker] /keypoints error:', e);
+setTimeout(loop, 500); // brief pause on error
+});
+});
+}
+ 
+loop();
+}
+ 
+/* ── Decorative canvas hand ── */
+function drawLoop() {
+function loop() {
+if (!active) { rafId = requestAnimationFrame(loop); return; }
+var W = canvas.offsetWidth, H = canvas.offsetHeight;
+canvas.width = W; canvas.height = H; ctx.clearRect(0, 0, W, H);
+var t = Date.now() / 1000,
+cx = W * .5 + Math.sin(t * .7) * W * .04,
+cy = H * .46 + Math.cos(t * .5) * H * .035;
+var palm = [[cx,cy],[cx-W*.065,cy+H*.065],[cx-W*.04,cy+H*.14],[cx+W*.04,cy+H*.14],[cx+W*.065,cy+H*.065]];
+ctx.beginPath(); ctx.moveTo(palm[0][0], palm[0][1]);
+palm.forEach(function(p){ ctx.lineTo(p[0], p[1]); }); ctx.closePath();
+ctx.strokeStyle = 'rgba(61,121,112,.5)'; ctx.lineWidth = 1.5; ctx.stroke();
+var fingers = [
+{ b:[cx-W*.075,cy], tip:[cx-W*.095,cy-H*.14] },
+{ b:[cx-W*.03,cy-H*.02], tip:[cx-W*.033,cy-H*.18] },
+{ b:[cx+W*.01,cy-H*.02], tip:[cx+W*.01, cy-H*.19] },
+{ b:[cx+W*.05,cy], tip:[cx+W*.065,cy-H*.16] },
+{ b:[cx+W*.08,cy+H*.03], tip:[cx+W*.125,cy-H*.04] },
+];
+fingers.forEach(function(f, i) {
+var w = Math.sin(t * 1.2 + i * .9) * H * .013;
+ctx.beginPath(); ctx.moveTo(f.b[0], f.b[1]); ctx.lineTo(f.tip[0], f.tip[1] + w);
+ctx.strokeStyle = 'rgba(61,121,112,.45)'; ctx.lineWidth = 1.2; ctx.stroke();
+var mid = [(f.b[0]+f.tip[0])/2, (f.b[1]+f.tip[1])/2+w/2];
+[f.b, mid, [f.tip[0], f.tip[1]+w]].forEach(function(p) {
+ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, Math.PI*2);
+ctx.fillStyle = 'rgba(61,121,112,.65)'; ctx.fill();
+});
+});
+ctx.beginPath(); ctx.arc(cx, cy+H*.1, 4.5, 0, Math.PI*2);
+ctx.fillStyle = 'rgba(34,211,238,0.7)'; ctx.fill();
+rafId = requestAnimationFrame(loop);
+}
+loop();
+}
+ 
+window.addEventListener('beforeunload', function() {
+active = false; running = false;
+cancelAnimationFrame(rafId);
+if (feed.srcObject) feed.srcObject.getTracks().forEach(function(t){ t.stop(); });
+});
 </script>
 </body>
 </html>
