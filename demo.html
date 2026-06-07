@@ -9,7 +9,7 @@
 <script src="lang.js" defer></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-
+ 
   /* ── Language Toggle ── */
   .lang-toggle {
     display: flex; align-items: center;
@@ -27,7 +27,7 @@
     border: none; background: none;
   }
   .lang-pill.active { background: var(--teal); color: #fff; }
-
+ 
   /* ── English font override ── */
   html[lang="en"] body,
   html[lang="en"] .logo-name, html[lang="en"] .logo-sub,
@@ -36,23 +36,116 @@
   html[lang="en"] .banner-sub, html[lang="en"] .foot-title,
   html[lang="en"] .foot-sub, html[lang="en"] .foot-nav a,
   html[lang="en"] .foot-badge, html[lang="en"] .lang-pill { font-family: 'Inter', sans-serif; }
-
+ 
   /* ── Smooth page fade ── */
   body { transition: opacity 0.18s ease; }
   body.lang-switching { opacity: 0; }
-
+ 
   /* ── Bilingual content ── */
   [data-ar], [data-en], span[data-ar], span[data-en] { display: none; }
   html[lang="ar"] [data-ar]     { display: revert; }
   html[lang="en"] [data-en]     { display: revert; }
   html[lang="ar"] span[data-ar] { display: inline; }
   html[lang="en"] span[data-en] { display: inline; }
-
+ 
+  /* ── TTS Controls ── */
+  .tts-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 0.9rem 1.2rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+  .tts-icon {
+    flex-shrink: 0;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--teal-lt, rgba(61,121,112,0.1));
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tts-icon svg { display: block; }
+  .tts-label-group {
+    flex: 1;
+    min-width: 120px;
+  }
+  .tts-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink2, #1a2e2b);
+  }
+  .tts-subtitle {
+    font-size: 0.78rem;
+    color: var(--muted, #7a9490);
+    margin-top: 1px;
+  }
+  .tts-toggle-btn {
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 18px;
+    border-radius: 999px;
+    border: 1.5px solid var(--teal, #3d7970);
+    background: transparent;
+    color: var(--teal, #3d7970);
+    font-size: 0.82rem; font-weight: 700;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .tts-toggle-btn.on {
+    background: var(--teal, #3d7970);
+    color: #fff;
+  }
+  .tts-toggle-btn:hover { opacity: 0.85; }
+ 
+  /* Speaking pulse indicator */
+  .tts-speaking-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #22d3ee;
+    margin-inline-end: 6px;
+    animation: tts-pulse 0.7s ease-in-out infinite alternate;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .tts-speaking-dot.active { opacity: 1; }
+  @keyframes tts-pulse {
+    from { transform: scale(0.8); opacity: 0.6; }
+    to   { transform: scale(1.3); opacity: 1; }
+  }
+ 
+  /* Voice selector */
+  .tts-voice-select {
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border, #d4e0de);
+    background: var(--white, #fff);
+    color: var(--ink2, #1a2e2b);
+    font-size: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    max-width: 170px;
+  }
+  .tts-voice-select:focus { outline: 1.5px solid var(--teal, #3d7970); }
+ 
+  /* Rate slider */
+  .tts-rate-group {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 0.78rem; color: var(--muted, #7a9490); font-weight: 600;
+  }
+  .tts-rate-group input[type=range] {
+    width: 80px; accent-color: var(--teal, #3d7970); cursor: pointer;
+  }
+ 
 </style>
 </head>
 <body>
 <div class="page">
-
+ 
 <nav>
   <div class="nav-logo">
     <div class="logo-mark"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></div>
@@ -61,25 +154,24 @@
       <div class="logo-sub"><span data-ar>مترجم لغة الإشارة</span><span data-en>Sign Language Translator</span></div>
     </div>
   </div>
-
+ 
   <div class="nav-links">
     <a href="index.html"><span data-ar>الرئيسية</span><span data-en>Home</span></a>
     <a href="demo.html" class="active"><span data-ar>النموذج</span><span data-en>Demo</span></a>
     <a href="how.html"><span data-ar>آلية العمل</span><span data-en>How It Works</span></a>
-    
   </div>
-
+ 
   <button class="lang-toggle" id="langToggle" aria-label="Switch language">
     <span class="lang-pill active" id="pillAr">عر</span>
     <span class="lang-pill"        id="pillEn">EN</span>
   </button>
-
+ 
   <div class="nav-pill">
     <span data-ar>مشروع تخرج · جامعة الطائف</span>
     <span data-en>Graduation Project · Taif University</span>
   </div>
 </nav>
-
+ 
 <div class="page-banner">
   <div class="banner-content">
     <div class="banner-breadcrumb">
@@ -96,7 +188,7 @@
     </p>
   </div>
 </div>
-
+ 
 <div class="demo-layout">
   <div class="cam-card">
     <div class="cam-topbar">
@@ -106,7 +198,7 @@
         <span class="rec-dot"></span>مباشر
       </div>
     </div>
-
+ 
     <div class="cam-viewport" id="cam-vp">
       <div class="cam-off-msg" id="off-msg">
         <div class="ico-lrg">
@@ -127,7 +219,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
       </button>
     </div>
-
+ 
     <div class="output-area">
       <div class="out-box">
         <div class="out-lbl"><span data-ar>الإشارة المكتشفة</span><span data-en>Detected Sign</span></div>
@@ -140,13 +232,56 @@
         <div class="conf-bar"><div class="conf-fill amber" id="cf2"></div></div>
       </div>
     </div>
-
+ 
     <div class="sentence-box">
       <div class="sent-lbl"><span data-ar>الجملة المترجمة</span><span data-en>Translated Sentence</span></div>
       <div class="sent-txt" id="sentence"><span data-ar>في انتظار اكتشاف الإشارة...</span><span data-en>Waiting for sign detection...</span></div>
     </div>
+ 
+    <!-- ── TTS Control Bar ── -->
+    <div class="tts-bar" id="tts-bar">
+      <div class="tts-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal,#3d7970)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+        </svg>
+      </div>
+      <div class="tts-label-group">
+        <div class="tts-title">
+          <span class="tts-speaking-dot" id="tts-dot"></span>
+          <span data-ar>نطق تلقائي</span><span data-en>Text-to-Speech</span>
+        </div>
+        <div class="tts-subtitle">
+          <span data-ar>تشغيل الصوت عند اكتشاف إشارة</span>
+          <span data-en>Speak detected signs aloud</span>
+        </div>
+      </div>
+ 
+      <!-- Voice selector -->
+      <select class="tts-voice-select" id="tts-voice-select" title="Select voice">
+        <option value=""><span data-ar>الصوت الافتراضي</span><span data-en>Default voice</span></option>
+      </select>
+ 
+      <!-- Rate control -->
+      <div class="tts-rate-group">
+        <span data-ar>السرعة</span><span data-en>Speed</span>
+        <input type="range" id="tts-rate" min="0.5" max="2" step="0.1" value="1">
+        <span id="tts-rate-val">1×</span>
+      </div>
+ 
+      <!-- On/Off toggle -->
+      <button class="tts-toggle-btn" id="tts-toggle-btn" type="button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" id="tts-btn-icon"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+        <span id="tts-btn-label">
+          <span data-ar>تفعيل</span><span data-en>Enable</span>
+        </span>
+      </button>
+    </div>
+    <!-- ── / TTS Control Bar ── -->
+ 
   </div>
-
+ 
   <!-- Instructions -->
   <div style="margin-top:2rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
     <div style="background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.3rem;text-align:center">
@@ -177,7 +312,7 @@
       </div>
     </div>
   </div>
-
+ 
   <div style="margin-top:1.5rem;background:var(--teal-lt);border:1px solid rgba(61,121,112,.18);border-radius:12px;padding:1rem 1.3rem;display:flex;gap:10px;align-items:flex-start">
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     <div style="font-size:.88rem;font-weight:500;color:var(--ink2);line-height:1.8">
@@ -186,9 +321,9 @@
     </div>
   </div>
 </div>
-
+ 
 </div>
-
+ 
 <div class="foot">
   <div>
     <div class="foot-title"><span data-ar>HandTalker — مشروع التخرج</span><span data-en>HandTalker — Graduation Project</span></div>
@@ -198,16 +333,15 @@
     <a href="index.html"><span data-ar>الرئيسية</span><span data-en>Home</span></a>
     <a href="demo.html"><span data-ar>النموذج</span><span data-en>Demo</span></a>
     <a href="how.html"><span data-ar>آلية العمل</span><span data-en>How It Works</span></a>
-    
   </div>
   <div class="foot-badge"><span data-ar>جامعة الطائف · ٢٠٢٥-٢٠٢٦</span><span data-en>Taif University · 2025–2026</span></div>
 </div>
-
+ 
 <div id="toast"></div>
-
+ 
 <script>
 var API = 'https://naiiiiififif-simplemodel.hf.space';
- 
+ 
 /* ── DOM refs ── */
 var vp = document.getElementById('cam-vp'),
 feed = document.getElementById('cam-feed'),
@@ -224,7 +358,7 @@ cf2 = document.getElementById('cf2'),
 canvas = document.getElementById('lm-canvas'),
 ctx = canvas.getContext('2d'),
 corners = document.querySelectorAll('.corner');
- 
+ 
 /* ── State ── */
 var active = false;
 var running = false;
@@ -236,249 +370,399 @@ var THRESHOLD = 0.75;
 var SMOOTHING = 6;
 var captureCanvas = document.createElement('canvas');
 var captureCtx = captureCanvas.getContext('2d');
- 
+ 
+/* ═══════════════════════════════════════════
+   TEXT-TO-SPEECH MODULE
+   Uses the Web Speech API (no API key needed,
+   built into all modern browsers).
+═══════════════════════════════════════════ */
+var tts = {
+  enabled: false,
+  synth: window.speechSynthesis,
+  voices: [],
+  selectedVoice: null,
+  rate: 1,
+  lastSpoken: '',
+  dot: document.getElementById('tts-dot'),
+  toggleBtn: document.getElementById('tts-toggle-btn'),
+  btnLabel: document.getElementById('tts-btn-label'),
+  btnIcon: document.getElementById('tts-btn-icon'),
+  voiceSelect: document.getElementById('tts-voice-select'),
+  rateSlider: document.getElementById('tts-rate'),
+  rateVal: document.getElementById('tts-rate-val'),
+ 
+  /* Load available voices and populate the <select> */
+  loadVoices: function() {
+    var self = this;
+    self.voices = self.synth.getVoices();
+    self.voiceSelect.innerHTML = '';
+ 
+    // Default option
+    var defOpt = document.createElement('option');
+    defOpt.value = '';
+    defOpt.textContent = getLang() === 'ar' ? 'الصوت الافتراضي' : 'Default voice';
+    self.voiceSelect.appendChild(defOpt);
+ 
+    // Prefer Arabic voices first, then all others
+    var arVoices = self.voices.filter(function(v){ return v.lang.startsWith('ar'); });
+    var otherVoices = self.voices.filter(function(v){ return !v.lang.startsWith('ar'); });
+    var sorted = arVoices.concat(otherVoices);
+ 
+    sorted.forEach(function(v) {
+      var opt = document.createElement('option');
+      opt.value = v.name;
+      opt.textContent = v.name + ' (' + v.lang + ')';
+      self.voiceSelect.appendChild(opt);
+    });
+ 
+    // Auto-select the first Arabic voice when UI is in Arabic
+    if (getLang() === 'ar' && arVoices.length > 0) {
+      self.voiceSelect.value = arVoices[0].name;
+      self.selectedVoice = arVoices[0];
+    }
+  },
+ 
+  /* Speak a word/phrase */
+  speak: function(text) {
+    if (!this.enabled || !text || text === '—' || text.toLowerCase() === 'idle') return;
+    if (text === this.lastSpoken) return; // don't repeat same word immediately
+    this.lastSpoken = text;
+ 
+    // Cancel any ongoing speech
+    this.synth.cancel();
+ 
+    var utt = new SpeechSynthesisUtterance(text);
+    utt.rate = this.rate;
+    utt.pitch = 1;
+    utt.volume = 1;
+ 
+    // Set language based on selected voice or page language
+    if (this.selectedVoice) {
+      utt.voice = this.selectedVoice;
+      utt.lang = this.selectedVoice.lang;
+    } else {
+      utt.lang = getLang() === 'ar' ? 'ar-SA' : 'en-US';
+    }
+ 
+    var dot = this.dot;
+    utt.onstart  = function() { dot.classList.add('active'); };
+    utt.onend    = function() { dot.classList.remove('active'); };
+    utt.onerror  = function() { dot.classList.remove('active'); };
+ 
+    this.synth.speak(utt);
+  },
+ 
+  /* Toggle TTS on/off */
+  toggle: function() {
+    this.enabled = !this.enabled;
+    var btn = this.toggleBtn;
+ 
+    if (this.enabled) {
+      btn.classList.add('on');
+      // Swap icon to speaker-on
+      this.btnIcon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>';
+      this.btnLabel.innerHTML = getLang() === 'ar'
+        ? '<span data-ar style="display:inline">إيقاف</span>'
+        : '<span data-en style="display:inline">Disable</span>';
+      toast(getLang() === 'ar' ? 'تم تفعيل النطق الصوتي 🔊' : 'Text-to-Speech enabled 🔊');
+    } else {
+      btn.classList.remove('on');
+      this.synth.cancel();
+      this.dot.classList.remove('active');
+      // Swap icon back to muted
+      this.btnIcon.innerHTML = '<line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/>';
+      this.btnLabel.innerHTML = getLang() === 'ar'
+        ? '<span data-ar style="display:inline">تفعيل</span>'
+        : '<span data-en style="display:inline">Enable</span>';
+      toast(getLang() === 'ar' ? 'تم إيقاف النطق الصوتي' : 'Text-to-Speech disabled');
+    }
+  },
+ 
+  /* Init */
+  init: function() {
+    var self = this;
+    if (!('speechSynthesis' in window)) {
+      document.getElementById('tts-bar').style.display = 'none';
+      console.warn('[TTS] Web Speech API not supported in this browser.');
+      return;
+    }
+ 
+    // Voices may load async
+    self.loadVoices();
+    if (self.synth.onvoiceschanged !== undefined) {
+      self.synth.onvoiceschanged = function() { self.loadVoices(); };
+    }
+ 
+    // Toggle button
+    self.toggleBtn.addEventListener('click', function() { self.toggle(); });
+ 
+    // Voice select
+    self.voiceSelect.addEventListener('change', function() {
+      var name = self.voiceSelect.value;
+      self.selectedVoice = name ? self.voices.find(function(v){ return v.name === name; }) : null;
+      self.lastSpoken = ''; // reset so next word is spoken
+    });
+ 
+    // Rate slider
+    self.rateSlider.addEventListener('input', function() {
+      self.rate = parseFloat(self.rateSlider.value);
+      self.rateVal.textContent = self.rate.toFixed(1) + '×';
+    });
+  }
+};
+ 
+/* Boot TTS */
+tts.init();
+ 
 /* ── Debug stats ── */
 var stats = {
-framesCapture : 0,
-framesSent : 0,
-predictions : 0,
-errors : 0,
-lastKpMs : 0,
-lastPredMs : 0,
-startTime : null,
-lastLabel : '—',
-lastConf : 0,
+  framesCapture : 0,
+  framesSent    : 0,
+  predictions   : 0,
+  errors        : 0,
+  lastKpMs      : 0,
+  lastPredMs    : 0,
+  startTime     : null,
+  lastLabel     : '—',
+  lastConf      : 0,
 };
- 
+ 
 /* ── Inject debug panel ── */
 var debugPanel = document.createElement('div');
 debugPanel.id = 'debug-panel';
 debugPanel.style.cssText = [
-'position:fixed', 'bottom:16px', 'left:16px', 'z-index:9999',
-'background:rgba(10,20,18,0.92)', 'color:#7effd4',
-'font:12px/1.7 monospace', 'padding:10px 14px',
-'border-radius:10px', 'border:1px solid rgba(61,121,112,.4)',
-'min-width:260px', 'pointer-events:none',
-'backdrop-filter:blur(6px)',
+  'position:fixed','bottom:16px','left:16px','z-index:9999',
+  'background:rgba(10,20,18,0.92)','color:#7effd4',
+  'font:12px/1.7 monospace','padding:10px 14px',
+  'border-radius:10px','border:1px solid rgba(61,121,112,.4)',
+  'min-width:260px','pointer-events:none',
+  'backdrop-filter:blur(6px)',
 ].join(';');
 document.body.appendChild(debugPanel);
- 
+ 
 function updateDebug() {
-var elapsed = stats.startTime ? ((Date.now() - stats.startTime) / 1000).toFixed(1) : '0';
-var fps = elapsed > 0 ? (stats.framesSent / elapsed).toFixed(1) : '0';
-debugPanel.innerHTML = [
-'<b style="color:#22d3ee">🟢 HandTalker Debug</b>',
-'──────────────────────',
-'⏱️ Uptime : ' + elapsed + 's',
-'📸 Frames sent : ' + stats.framesSent,
-'⚡️ Effective fps : ' + fps + '/s',
-'🔁 Buffer : ' + buffer.length + ' / 30',
-'🧠 Predictions : ' + stats.predictions,
-'❌ Errors : ' + stats.errors,
-'─── Latency ───────────',
-'📡 /keypoints : ' + stats.lastKpMs + 'ms',
-'🤖 /predict : ' + stats.lastPredMs + 'ms',
-'─── Last Result ────────',
-'🏷 Label : ' + stats.lastLabel,
-'📊 Confidence : ' + (stats.lastConf * 100).toFixed(1) + '%',
-].join('<br>');
+  var elapsed = stats.startTime ? ((Date.now() - stats.startTime) / 1000).toFixed(1) : '0';
+  var fps = elapsed > 0 ? (stats.framesSent / elapsed).toFixed(1) : '0';
+  debugPanel.innerHTML = [
+    '<b style="color:#22d3ee">🟢 HandTalker Debug</b>',
+    '──────────────────────',
+    '⏱️  Uptime       : ' + elapsed + 's',
+    '📸 Frames sent  : ' + stats.framesSent,
+    '⚡️ Effective fps: ' + fps + '/s',
+    '🔁 Buffer       : ' + buffer.length + ' / 30',
+    '🧠 Predictions  : ' + stats.predictions,
+    '❌ Errors       : ' + stats.errors,
+    '─── Latency ───────────',
+    '📡 /keypoints   : ' + stats.lastKpMs + 'ms',
+    '🤖 /predict     : ' + stats.lastPredMs + 'ms',
+    '─── Last Result ────────',
+    '🏷  Label        : ' + stats.lastLabel,
+    '📊 Confidence   : ' + (stats.lastConf * 100).toFixed(1) + '%',
+    '─── TTS ────────────────',
+    '🔊 Status       : ' + (tts.enabled ? 'ON' : 'OFF'),
+    '🎙  Voice        : ' + (tts.selectedVoice ? tts.selectedVoice.name.substring(0,18) : 'default'),
+    '⏩ Rate         : ' + tts.rate + '×',
+  ].join('<br>');
 }
- 
+ 
 setInterval(updateDebug, 300);
- 
+ 
 /* ── Helpers ── */
 function toast(m) {
-var t = document.getElementById('toast');
-t.textContent = m; t.classList.add('show');
-setTimeout(function(){ t.classList.remove('show'); }, 3000);
+  var t = document.getElementById('toast');
+  t.textContent = m; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
 }
- 
+ 
 function getLang() { return document.documentElement.lang || 'ar'; }
- 
+ 
 function captureFrame() {
-captureCanvas.width = feed.videoWidth || 640;
-captureCanvas.height = feed.videoHeight || 480;
-captureCtx.drawImage(feed, 0, 0, captureCanvas.width, captureCanvas.height);
-return new Promise(function(resolve) {
-captureCanvas.toBlob(resolve, 'image/jpeg', 0.8);
-});
+  captureCanvas.width  = feed.videoWidth  || 640;
+  captureCanvas.height = feed.videoHeight || 480;
+  captureCtx.drawImage(feed, 0, 0, captureCanvas.width, captureCanvas.height);
+  return new Promise(function(resolve) {
+    captureCanvas.toBlob(resolve, 'image/jpeg', 0.8);
+  });
 }
- 
+ 
 function showResult(label, confidence) {
-arWord.style.opacity = '0'; confNum.style.opacity = '0';
-setTimeout(function() {
-arWord.textContent = label;
-var confPct = Math.round(confidence * 100);
-confNum.textContent = confPct + (getLang() === 'ar' ? '٪' : '%');
-cf1.style.width = confPct + '%';
-cf2.style.width = confPct + '%';
-arWord.style.opacity = '1';
-confNum.style.opacity = '1';
-}, 180);
+  arWord.style.opacity = '0'; confNum.style.opacity = '0';
+  setTimeout(function() {
+    arWord.textContent = label;
+    var confPct = Math.round(confidence * 100);
+    confNum.textContent = confPct + (getLang() === 'ar' ? '٪' : '%');
+    cf1.style.width = confPct + '%';
+    cf2.style.width = confPct + '%';
+    arWord.style.opacity = '1';
+    confNum.style.opacity = '1';
+  }, 180);
 }
- 
+ 
 function addToSentence(word) {
-if (word.toLowerCase() === 'idle') return;
-if (sentWords.length && sentWords[sentWords.length - 1] === word) return;
-sentWords.push(word);
-if (sentWords.length > 10) sentWords.shift();
-sentence.textContent = sentWords.join(' ');
+  if (word.toLowerCase() === 'idle') return;
+  if (sentWords.length && sentWords[sentWords.length - 1] === word) return;
+  sentWords.push(word);
+  if (sentWords.length > 10) sentWords.shift();
+  sentence.textContent = sentWords.join(' ');
+ 
+  /* ── Speak the newly added word ── */
+  tts.speak(word);
 }
- 
+ 
 /* ── Camera ── */
 function startCam() {
-navigator.mediaDevices.getUserMedia({ video: { facingMode:'user', width:{ ideal:1280 } } })
-.then(function(stream) {
-feed.srcObject = stream; feed.style.display = 'block';
-offMsg.style.opacity = '0'; playBtn.style.display = 'none';
-recInd.style.opacity = '1'; liveBadge.style.display = 'block';
-scanRing.style.display = 'block'; canvas.style.display = 'block';
-corners.forEach(function(c){ c.style.display = 'block'; });
-active = true;
-stats.startTime = Date.now();
-console.log('[HandTalker] Camera started');
-toast(getLang() === 'ar' ? 'تمّ تفعيل الكاميرا ✓' : 'Camera activated ✓');
-//drawLoop();
-startDetection();
-})
-.catch(function(err){
-console.error('[HandTalker] Camera error:', err);
-toast(getLang() === 'ar' ? 'تعذّر الوصول إلى الكاميرا' : 'Could not access camera');
-});
+  navigator.mediaDevices.getUserMedia({ video: { facingMode:'user', width:{ ideal:1280 } } })
+  .then(function(stream) {
+    feed.srcObject = stream; feed.style.display = 'block';
+    offMsg.style.opacity = '0'; playBtn.style.display = 'none';
+    recInd.style.opacity = '1'; liveBadge.style.display = 'block';
+    scanRing.style.display = 'block'; canvas.style.display = 'block';
+    corners.forEach(function(c){ c.style.display = 'block'; });
+    active = true;
+    stats.startTime = Date.now();
+    console.log('[HandTalker] Camera started');
+    toast(getLang() === 'ar' ? 'تمّ تفعيل الكاميرا ✓' : 'Camera activated ✓');
+    startDetection();
+  })
+  .catch(function(err){
+    console.error('[HandTalker] Camera error:', err);
+    toast(getLang() === 'ar' ? 'تعذّر الوصول إلى الكاميرا' : 'Could not access camera');
+  });
 }
- 
+ 
 vp.addEventListener('click', function(){ if (!active) startCam(); });
 playBtn.addEventListener('click', function(e){ e.stopPropagation(); if (!active) startCam(); });
- 
-/* ── Detection loop — runs as fast as network allows ── */
+ 
+/* ── Detection loop ── */
 function startDetection() {
-if (running) return;
-running = true;
-console.log('[HandTalker] Detection loop started. API:', API);
- 
-function loop() {
-if (!active) { setTimeout(loop, 200); return; }
- 
-captureFrame().then(function(blob) {
-stats.framesSent++;
-var t0 = Date.now();
- 
-var fd = new FormData();
-fd.append('file', blob, 'frame.jpg');
- 
-fetch(API + '/keypoints', { method: 'POST', body: fd })
-.then(function(r) { return r.json(); })
-.then(function(data) {
-stats.lastKpMs = Date.now() - t0;
-buffer.push(data.keypoints);
- 
-// Show buffer fill on confidence bar while collecting
-cf1.style.width = Math.round((buffer.length / 30) * 100) + '%';
- 
-console.log('[kp] frame', stats.framesSent,
-'| buffer:', buffer.length + '/30',
-'| hands:', data.hands_detected,
-'| latency:', stats.lastKpMs + 'ms');
- 
-if (buffer.length >= 30) {
-var t1 = Date.now();
-var seq = buffer.slice(); // copy
-buffer = []; // clear immediately so loop continues
- 
-fetch(API + '/predict', {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ sequence: seq })
-})
-.then(function(r) { return r.json(); })
-.then(function(result) {
-stats.lastPredMs = Date.now() - t1;
-stats.predictions++;
-stats.lastLabel = result.label;
-stats.lastConf = result.confidence;
- 
-console.log('[pred] label:', result.label,
-'| conf:', (result.confidence * 100).toFixed(1) + '%',
-'| top3:', result.top3.map(function(x){ return x.label + '(' + (x.confidence*100).toFixed(0) + '%)'; }).join(', '),
-'| latency:', stats.lastPredMs + 'ms');
- 
-if (result.confidence >= THRESHOLD) {
-voteHistory.push(result.label);
-if (voteHistory.length > SMOOTHING) voteHistory.shift();
-var votes = voteHistory.filter(function(v){ return v === result.label; }).length;
-if (votes >= Math.round(SMOOTHING * 0.6)) {
-console.log('[vote] ✅ accepted:', result.label, '| votes:', votes + '/' + SMOOTHING);
-showResult(result.label, result.confidence);
-addToSentence(result.label);
-voteHistory = [];
-} else {
-console.log('[vote] ⏳ waiting for more votes:', result.label, votes + '/' + Math.round(SMOOTHING * 0.6));
+  if (running) return;
+  running = true;
+  console.log('[HandTalker] Detection loop started. API:', API);
+ 
+  function loop() {
+    if (!active) { setTimeout(loop, 200); return; }
+ 
+    captureFrame().then(function(blob) {
+      stats.framesSent++;
+      var t0 = Date.now();
+ 
+      var fd = new FormData();
+      fd.append('file', blob, 'frame.jpg');
+ 
+      fetch(API + '/keypoints', { method: 'POST', body: fd })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        stats.lastKpMs = Date.now() - t0;
+        buffer.push(data.keypoints);
+ 
+        cf1.style.width = Math.round((buffer.length / 30) * 100) + '%';
+ 
+        console.log('[kp] frame', stats.framesSent,
+          '| buffer:', buffer.length + '/30',
+          '| hands:', data.hands_detected,
+          '| latency:', stats.lastKpMs + 'ms');
+ 
+        if (buffer.length >= 30) {
+          var t1 = Date.now();
+          var seq = buffer.slice();
+          buffer = [];
+ 
+          fetch(API + '/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sequence: seq })
+          })
+          .then(function(r) { return r.json(); })
+          .then(function(result) {
+            stats.lastPredMs = Date.now() - t1;
+            stats.predictions++;
+            stats.lastLabel = result.label;
+            stats.lastConf  = result.confidence;
+ 
+            console.log('[pred] label:', result.label,
+              '| conf:', (result.confidence * 100).toFixed(1) + '%',
+              '| top3:', result.top3.map(function(x){ return x.label + '(' + (x.confidence*100).toFixed(0) + '%)'; }).join(', '),
+              '| latency:', stats.lastPredMs + 'ms');
+ 
+            if (result.confidence >= THRESHOLD) {
+              voteHistory.push(result.label);
+              if (voteHistory.length > SMOOTHING) voteHistory.shift();
+              var votes = voteHistory.filter(function(v){ return v === result.label; }).length;
+              if (votes >= Math.round(SMOOTHING * 0.6)) {
+                console.log('[vote] ✅ accepted:', result.label, '| votes:', votes + '/' + SMOOTHING);
+                showResult(result.label, result.confidence);
+                addToSentence(result.label); // TTS fires here
+                voteHistory = [];
+              } else {
+                console.log('[vote] ⏳ waiting for more votes:', result.label, votes + '/' + Math.round(SMOOTHING * 0.6));
+              }
+            } else {
+              console.log('[pred] ⬇️ below threshold:', (result.confidence * 100).toFixed(1) + '% < ' + (THRESHOLD * 100) + '%');
+            }
+          })
+          .catch(function(e) {
+            stats.errors++;
+            console.error('[HandTalker] /predict error:', e);
+          });
+        }
+ 
+        loop();
+      })
+      .catch(function(e) {
+        stats.errors++;
+        console.error('[HandTalker] /keypoints error:', e);
+        setTimeout(loop, 500);
+      });
+    });
+  }
+ 
+  loop();
 }
-} else {
-console.log('[pred] ⬇️ below threshold:', (result.confidence * 100).toFixed(1) + '% < ' + (THRESHOLD * 100) + '%');
-}
-})
-.catch(function(e) {
-stats.errors++;
-console.error('[HandTalker] /predict error:', e);
-});
-}
- 
-loop(); // next frame immediately
-})
-.catch(function(e) {
-stats.errors++;
-console.error('[HandTalker] /keypoints error:', e);
-setTimeout(loop, 500); // brief pause on error
-});
-});
-}
- 
-loop();
-}
- 
+ 
 /* ── Decorative canvas hand ── */
 function drawLoop() {
-function loop() {
-if (!active) { rafId = requestAnimationFrame(loop); return; }
-var W = canvas.offsetWidth, H = canvas.offsetHeight;
-canvas.width = W; canvas.height = H; ctx.clearRect(0, 0, W, H);
-var t = Date.now() / 1000,
-cx = W * .5 + Math.sin(t * .7) * W * .04,
-cy = H * .46 + Math.cos(t * .5) * H * .035;
-var palm = [[cx,cy],[cx-W*.065,cy+H*.065],[cx-W*.04,cy+H*.14],[cx+W*.04,cy+H*.14],[cx+W*.065,cy+H*.065]];
-ctx.beginPath(); ctx.moveTo(palm[0][0], palm[0][1]);
-palm.forEach(function(p){ ctx.lineTo(p[0], p[1]); }); ctx.closePath();
-ctx.strokeStyle = 'rgba(61,121,112,.5)'; ctx.lineWidth = 1.5; ctx.stroke();
-var fingers = [
-{ b:[cx-W*.075,cy], tip:[cx-W*.095,cy-H*.14] },
-{ b:[cx-W*.03,cy-H*.02], tip:[cx-W*.033,cy-H*.18] },
-{ b:[cx+W*.01,cy-H*.02], tip:[cx+W*.01, cy-H*.19] },
-{ b:[cx+W*.05,cy], tip:[cx+W*.065,cy-H*.16] },
-{ b:[cx+W*.08,cy+H*.03], tip:[cx+W*.125,cy-H*.04] },
-];
-fingers.forEach(function(f, i) {
-var w = Math.sin(t * 1.2 + i * .9) * H * .013;
-ctx.beginPath(); ctx.moveTo(f.b[0], f.b[1]); ctx.lineTo(f.tip[0], f.tip[1] + w);
-ctx.strokeStyle = 'rgba(61,121,112,.45)'; ctx.lineWidth = 1.2; ctx.stroke();
-var mid = [(f.b[0]+f.tip[0])/2, (f.b[1]+f.tip[1])/2+w/2];
-[f.b, mid, [f.tip[0], f.tip[1]+w]].forEach(function(p) {
-ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, Math.PI*2);
-ctx.fillStyle = 'rgba(61,121,112,.65)'; ctx.fill();
-});
-});
-ctx.beginPath(); ctx.arc(cx, cy+H*.1, 4.5, 0, Math.PI*2);
-ctx.fillStyle = 'rgba(34,211,238,0.7)'; ctx.fill();
-rafId = requestAnimationFrame(loop);
+  function loop() {
+    if (!active) { rafId = requestAnimationFrame(loop); return; }
+    var W = canvas.offsetWidth, H = canvas.offsetHeight;
+    canvas.width = W; canvas.height = H; ctx.clearRect(0, 0, W, H);
+    var t = Date.now() / 1000,
+        cx = W * .5 + Math.sin(t * .7) * W * .04,
+        cy = H * .46 + Math.cos(t * .5) * H * .035;
+    var palm = [[cx,cy],[cx-W*.065,cy+H*.065],[cx-W*.04,cy+H*.14],[cx+W*.04,cy+H*.14],[cx+W*.065,cy+H*.065]];
+    ctx.beginPath(); ctx.moveTo(palm[0][0], palm[0][1]);
+    palm.forEach(function(p){ ctx.lineTo(p[0], p[1]); }); ctx.closePath();
+    ctx.strokeStyle = 'rgba(61,121,112,.5)'; ctx.lineWidth = 1.5; ctx.stroke();
+    var fingers = [
+      { b:[cx-W*.075,cy],     tip:[cx-W*.095,cy-H*.14] },
+      { b:[cx-W*.03, cy-H*.02], tip:[cx-W*.033,cy-H*.18] },
+      { b:[cx+W*.01, cy-H*.02], tip:[cx+W*.01, cy-H*.19] },
+      { b:[cx+W*.05, cy],     tip:[cx+W*.065,cy-H*.16] },
+      { b:[cx+W*.08, cy+H*.03], tip:[cx+W*.125,cy-H*.04] },
+    ];
+    fingers.forEach(function(f, i) {
+      var w = Math.sin(t * 1.2 + i * .9) * H * .013;
+      ctx.beginPath(); ctx.moveTo(f.b[0], f.b[1]); ctx.lineTo(f.tip[0], f.tip[1] + w);
+      ctx.strokeStyle = 'rgba(61,121,112,.45)'; ctx.lineWidth = 1.2; ctx.stroke();
+      var mid = [(f.b[0]+f.tip[0])/2, (f.b[1]+f.tip[1])/2+w/2];
+      [f.b, mid, [f.tip[0], f.tip[1]+w]].forEach(function(p) {
+        ctx.beginPath(); ctx.arc(p[0], p[1], 3, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(61,121,112,.65)'; ctx.fill();
+      });
+    });
+    ctx.beginPath(); ctx.arc(cx, cy+H*.1, 4.5, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(34,211,238,0.7)'; ctx.fill();
+    rafId = requestAnimationFrame(loop);
+  }
+  loop();
 }
-loop();
-}
- 
+ 
 window.addEventListener('beforeunload', function() {
-active = false; running = false;
-cancelAnimationFrame(rafId);
-if (feed.srcObject) feed.srcObject.getTracks().forEach(function(t){ t.stop(); });
+  active = false; running = false;
+  cancelAnimationFrame(rafId);
+  if (tts.synth) tts.synth.cancel();
+  if (feed.srcObject) feed.srcObject.getTracks().forEach(function(t){ t.stop(); });
 });
 </script>
 </body>
 </html>
+ 
