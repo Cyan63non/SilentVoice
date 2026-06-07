@@ -362,6 +362,7 @@ corners = document.querySelectorAll('.corner');
 /* ── State ── */
 var active = false;
 var running = false;
+var predicting = false;   // ← NEW: true while /predict is in-flight
 var rafId = null;
 var buffer = [];
 var sentWords = [];
@@ -551,6 +552,7 @@ function updateDebug() {
     '⚡️ Effective fps: ' + fps + '/s',
     '🔁 Buffer       : ' + buffer.length + ' / 30',
     '🧠 Predictions  : ' + stats.predictions,
+    '⏳ Predicting   : ' + (predicting ? 'YES' : 'no'),
     '❌ Errors       : ' + stats.errors,
     '─── Latency ───────────',
     '📡 /keypoints   : ' + stats.lastKpMs + 'ms',
@@ -641,6 +643,8 @@ function startDetection() {
  
   function loop() {
     if (!active) { setTimeout(loop, 200); return; }
+    // Don't capture new frames while /predict is in-flight
+    if (predicting) { setTimeout(loop, 50); return; }
  
     captureFrame().then(function(blob) {
       stats.framesSent++;
@@ -663,6 +667,8 @@ function startDetection() {
           '| latency:', stats.lastKpMs + 'ms');
  
         if (buffer.length >= 30) {
+          // Freeze frame capture until prediction returns
+          predicting = true;
           var t1 = Date.now();
           var seq = buffer.slice();
           buffer = [];
@@ -691,7 +697,7 @@ function startDetection() {
               if (votes >= Math.round(SMOOTHING * 0.6)) {
                 console.log('[vote] ✅ accepted:', result.label, '| votes:', votes + '/' + SMOOTHING);
                 showResult(result.label, result.confidence);
-                addToSentence(result.label); // TTS fires here
+                addToSentence(result.label);
                 voteHistory = [];
               } else {
                 console.log('[vote] ⏳ waiting for more votes:', result.label, votes + '/' + Math.round(SMOOTHING * 0.6));
@@ -703,9 +709,18 @@ function startDetection() {
           .catch(function(e) {
             stats.errors++;
             console.error('[HandTalker] /predict error:', e);
+          })
+          .finally(function() {
+            // Resume frame capture whether predict succeeded or failed
+            predicting = false;
+            loop();
           });
+ 
+          // Don't fall through to loop() — wait for predict .finally() above
+          return;
         }
  
+        // Buffer not full yet — grab next frame immediately
         loop();
       })
       .catch(function(e) {
